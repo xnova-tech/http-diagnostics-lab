@@ -1,7 +1,9 @@
 """Real subprocess fixtures for the public baseline checks."""
 
+import os
 import socket
 import ssl
+import stat
 import subprocess
 import sys
 import time
@@ -65,6 +67,8 @@ def tls_server(tmp_path: Path):
         check=True,
     )
     assert "created" in result.stdout
+    if os.name == "posix":
+        assert stat.S_IMODE((cert_dir / "server-key.pem").stat().st_mode) & 0o077 == 0
     port = free_port()
     process = start_server(port, cert_dir)
     yield port, cert_dir

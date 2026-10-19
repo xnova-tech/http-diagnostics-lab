@@ -1,6 +1,7 @@
 """Start the loopback server or issue an ephemeral local CA certificate."""
 
 import argparse
+import os
 import socket
 import sys
 from pathlib import Path
@@ -27,8 +28,9 @@ def make_certificates(output: Path) -> None:
     cert = ca.issue_cert("localhost")
     ca.cert_pem.write_to_path(output / "ca.pem")
     cert.cert_chain_pems[0].write_to_path(output / "server.pem")
-    cert.private_key_pem.write_to_path(output / "server-key.pem")
-    (output / "server-key.pem").chmod(0o600)
+    key_fd = os.open(output / "server-key.pem", os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(key_fd, "wb") as key_file:
+        key_file.write(cert.private_key_pem.bytes())
     print(f"Local test certificates created in {output}")  # noqa: T201
 
 
