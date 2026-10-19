@@ -1,0 +1,1 @@
+{"url":"http://127.0.0.1:{http_port}/slow?delay=0.5","read_timeout_seconds":0.1}
